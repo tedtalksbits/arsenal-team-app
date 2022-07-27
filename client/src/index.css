@@ -36,3 +36,36 @@ code {
   display: grid;
   place-items: center;
 }
+.score-card-date{
+  color: #ffffff80;
+  text-align: left;
+  font-weight: 500;
+}
+.match-card.home{
+  background: #a31d21;
+}
+.match-card h3{
+  color: #bb9468;
+
+}
+.match-card.home h3{
+  color: white;
+}
+summary{
+  text-align: left;
+  margin-block: 1rem; 
+  cursor: pointer;
+  user-select: none;
+}
+.matches-dropdown{
+  font-size: 1.2rem;
+}
+
+.details.hide{
+  visibility: hidden;
+  height: 0;
+}
+.details.show{
+  visibility: visible;
+  height: auto;
+}
