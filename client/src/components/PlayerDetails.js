@@ -1,26 +1,26 @@
 import React from "react";
 import {
     Container,
-    PlayerCard,
-    PlayerCardDetails,
-    PlayerCardHead,
-    PlayerCardImage,
-} from "./PlayerCard";
+    PlayerCardElement,
+    PlayerCardDetailsElement,
+    PlayerCardHeadElement,
+    PlayerCardImageElement,
+} from "./Styled/PlayerCard";
 
 const PlayerDetails = ({ player }) => {
     return (
         <Container>
-            <PlayerCard>
-                <PlayerCardHead>
-                    <PlayerCardImage
+            <PlayerCardElement>
+                <PlayerCardHeadElement>
+                    <PlayerCardImageElement
                         src={
                             player.player_image ||
                             "https://via.placeholder.com/150"
                         }
                         alt="player"
                     />
-                </PlayerCardHead>
-                <PlayerCardDetails>
+                </PlayerCardHeadElement>
+                <PlayerCardDetailsElement>
                     <h1>
                         <span>{player.first_name}</span>
                         <span> {player.last_name}</span>
@@ -48,8 +48,8 @@ const PlayerDetails = ({ player }) => {
                         Country: {player.flag}
                         {player.nationality}
                     </h4>
-                </PlayerCardDetails>
-            </PlayerCard>
+                </PlayerCardDetailsElement>
+            </PlayerCardElement>
         </Container>
     );
 };

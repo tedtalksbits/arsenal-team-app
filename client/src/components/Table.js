@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
-import loadingImg from "../images/spin.svg";
+import loadingImg from "../images/ball.svg";
 import PlayerDetails from "./PlayerDetails";
 import { Box, Modal } from "@material-ui/core";
-
+import { Input } from "./Styled/Inputs";
+import { useQuery } from "react-query";
+import { fetchPlayers } from "../api/getTeamInfo";
 const Container = styled.div`
     margin: 3rem 0;
 
@@ -15,20 +17,20 @@ const Container = styled.div`
 const PlayerTable = styled.table`
     background: white;
     margin: 0 auto;
-    width: 80%;
+    width: 90%;
     border-collapse: collapse;
     text-align: left;
-    border-radius: 12px;
     overflow: hidden;
     display: table;
     border-spacing: 0;
-    box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
     max-width: 1100px;
     transition: 0.3s;
 
     th {
-        background: #f11f1f;
-        color: white;
+        color: #a5a5a7;
+        background: white;
+        font-weight: normal;
+        font-size: 0.9rem;
     }
     th,
     td {
@@ -36,122 +38,141 @@ const PlayerTable = styled.table`
         transition: 0.3s;
     }
     tr {
-        border-bottom: 1px lightgrey solid;
+        border-bottom: 1px #ebebeb solid;
         text-transform: capitalize;
         cursor: pointer;
         transition: 0.5s background cubic-bezier(0.19, 1, 0.22, 1);
     }
-    tr:nth-child(odd) {
+    /* tr:nth-child(odd) {
         background: #eeeeee;
-    }
+    } */
     tr:hover {
-        background: #f11f1f;
+        background: ${({ theme }) => theme.colors.arsenalRed};
         color: white;
     }
 
-    @media (max-width: 768px) {
-        td:nth-child(5),
-        th:nth-child(5) {
-            display: none;
-        }
-    }
-    @media (max-width: 600px) {
-        td:nth-child(4),
-        th:nth-child(4) {
-            display: none;
-        }
-    }
     @media (max-width: 374px) {
         font-size: 0.75rem;
     }
 `;
 const TableLink = styled.td`
     text-decoration: ${({ link }) => (link ? "underline" : "none")};
-    color: ${({ active }) => (active ? "#f11f1f" : "inherit")};
+    color: ${({ active }) =>
+        active ? `${({ theme }) => theme.colors.arsenalRed}` : "inherit"};
     :hover {
         color: ${({ active }) => (active ? "#fff" : "inherit")};
     }
 `;
 
-const Table = () => {
-    useEffect(() => {
-        fetchData();
-    }, []);
+const InputContainer = styled.div`
+    padding: 2rem;
+    max-width: 500px;
+    margin: auto;
+`;
 
-    const [playerData, setPlayerData] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
+export default function Table() {
     const [showDetails, setShowDetails] = useState(false);
     const [selectedPlayer, setSelectedPlayer] = useState(null);
-    async function fetchData() {
-        const response = await fetch(
-            "https://arsenal-players-api.herokuapp.com/players",
-            {
-                method: "GET",
-            }
+    const [searchTerm, setSearchTerm] = useState("");
+
+    const { data, status, error } = useQuery(["players"], fetchPlayers);
+
+    let filteredData = [];
+    if (status === "success") {
+        filteredData = data.filter((player) => {
+            return (
+                player.first_name
+                    .toLowerCase()
+                    .includes(searchTerm.toLowerCase()) ||
+                player.last_name
+                    .toLowerCase()
+                    .includes(searchTerm.toLowerCase())
+            );
+        });
+    }
+    const date = new Date().getFullYear();
+
+    if (status === "loading") {
+        return (
+            <div className="loading">
+                <div className="loading-content">
+                    <h1>Loading...</h1>
+                    <img src={loadingImg} alt="loading" />
+                </div>
+            </div>
         );
-        const result = await response.json();
-
-        setPlayerData(result);
-        setIsLoading(false);
-
-        // console.log(result);
+    }
+    if (status === "error") {
+        return (
+            <div className="loading">
+                <div className="loading-content">
+                    <h1>Oh oh.... something went wrong</h1>
+                    <p>{error.message}</p>
+                </div>
+            </div>
+        );
     }
 
-    const date = new Date().getFullYear();
     return (
         <Container>
             <div className="heading">
                 <h1>The Arsenal {date} Squad</h1>
+                <InputContainer className="search">
+                    <Input
+                        type="text"
+                        placeholder="Search by name"
+                        onChange={(e) => {
+                            setSearchTerm(e.target.value);
+                        }}
+                    />
+                </InputContainer>
             </div>
 
-            {isLoading ? (
-                <div className="loading">
-                    <div className="loading-content">
-                        <h1>Loading...</h1>
-                        <img src={loadingImg} alt="loading" />
-                    </div>
-                </div>
-            ) : (
-                <PlayerTable>
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Number</th>
-                        </tr>
-                    </thead>
+            <PlayerTable>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Image</th>
+                        <th>Number</th>
+                    </tr>
+                </thead>
 
-                    <tbody>
-                        {playerData.map((player) => (
-                            <tr key={player.id}>
-                                <TableLink
-                                    link={true}
-                                    active={
-                                        selectedPlayer?.first_name ===
-                                        player.first_name
+                <tbody>
+                    {filteredData.map((player) => (
+                        <tr key={player.id}>
+                            <TableLink
+                                link={true}
+                                active={selectedPlayer?.id === player.id}
+                                onClick={(e) => {
+                                    if (
+                                        selectedPlayer?.first_name !==
+                                            player?.first_name ||
+                                        showDetails === false
+                                    ) {
+                                        setShowDetails(true);
+                                        setSelectedPlayer(player);
+                                        e.target.classList.add("current");
                                     }
-                                    onClick={(e) => {
-                                        if (
-                                            selectedPlayer?.first_name !==
-                                                player?.first_name ||
-                                            showDetails === false
-                                        ) {
-                                            setShowDetails(true);
-                                            setSelectedPlayer(player);
-                                            e.target.classList.add("current");
-                                        }
-                                    }}
-                                >
-                                    <span>
-                                        {player.first_name} {player.last_name}
-                                    </span>
-                                </TableLink>
+                                }}
+                            >
+                                <span>
+                                    {player.first_name} {player.last_name}
+                                </span>
+                            </TableLink>
 
-                                <td>{player.shirt_number}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </PlayerTable>
-            )}
+                            <td>
+                                <img
+                                    src={player?.player_image}
+                                    alt={player?.first_name}
+                                    height="50"
+                                    width="50"
+                                />
+                            </td>
+                            <td>{player.shirt_number}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </PlayerTable>
 
             <Modal
                 open={showDetails}
@@ -159,7 +180,7 @@ const Table = () => {
                 aria-describedby="modal-modal-description"
                 onClose={() => setShowDetails(false)}
             >
-                <Box>
+                <Box style={{ outline: 0 }}>
                     <span
                         style={{
                             position: "absolute",
@@ -178,6 +199,4 @@ const Table = () => {
             </Modal>
         </Container>
     );
-};
-
-export default Table;
+}
