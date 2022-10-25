@@ -11,6 +11,7 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
 }
 
 code {
@@ -41,16 +42,16 @@ code {
   text-align: left;
   font-weight: 500;
 }
-.match-card.home{
+/* .match-card.home{
   background: #a31d21;
-}
-.match-card h3{
+} */
+/* .match-card h3{
   color: #bb9468;
 
-}
-.match-card.home h3{
+} */
+/* .match-card.home h3{
   color: white;
-}
+} */
 summary{
   text-align: left;
   margin-block: 1rem; 
@@ -68,4 +69,9 @@ summary{
 .details.show{
   visibility: visible;
   height: auto;
+}
+span.time, span.date{
+  display: block;
+  font-size: 0.8rem;
+  color: #ababab
 }

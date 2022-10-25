@@ -5,7 +5,7 @@ import MenuIcon from "@material-ui/icons/Menu";
 import { Link } from "react-router-dom";
 
 const Navbar = styled.nav`
-    background: #a31d21;
+    background: ${({ theme }) => theme.colors.arsenalRed};
     color: white;
     height: 4rem;
     display: flex;

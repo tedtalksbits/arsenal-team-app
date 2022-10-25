@@ -1,12 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
-
+import { fetchClubData, fetchTeamInfo } from "../api/getTeamInfo";
+import { useQuery } from "react-query";
+import loadingImg from "../images/ball.svg";
 export const MainHeader = styled.header`
     position: relative;
     padding-top: 7rem;
     padding-bottom: 8rem;
-    background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0)),
-        url(${(props) => props.image}) center center no-repeat;
+    /* background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0)),
+        url(${(props) => props.image}) center center no-repeat; */
+    background: ${({ image }) =>
+        image ? `url(${image}) center center no-repeat` : "#f6f6f6"};
     background-size: cover;
     text-align: center;
 
@@ -40,26 +44,39 @@ const Title = styled.div`
     }
 `;
 const Header = () => {
-    useEffect(() => {
-        fetchData();
-    }, []);
+    const [teamId] = useState("57");
 
-    const [arsenalData, setArsenalData] = useState([]);
+    const { data, status, error } = useQuery(["arsenal"], () =>
+        fetchClubData(teamId)
+    );
 
-    async function fetchData() {
-        const response = await fetch(
-            "http://api.football-data.org/v2/teams/57",
-            {
-                method: "GET",
-                headers: {
-                    "X-Auth-Token": "8c5b41465c1b4aa4bacb9a446dc74bff",
-                },
-            }
+    if (status === "loading") {
+        return (
+            <div className="container">
+                <div className="club-data">
+                    <div className="loading">
+                        <div className="loading-content">
+                            <h1>Loading...</h1>
+                            <img src={loadingImg} alt="loading" />
+                        </div>
+                    </div>
+                </div>
+            </div>
         );
-        const result = await response.json();
-        console.log(result);
-        setArsenalData(result);
-        // console.log(result);
+    }
+    if (status === "error") {
+        return (
+            <div className="container">
+                <div className="club-data">
+                    <div className="loading">
+                        <div className="loading-content">
+                            <h1>Oh oh.... something went wrong</h1>
+                            <p>{error}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
     }
 
     return (
@@ -70,12 +87,12 @@ const Header = () => {
             <div className="container">
                 <div className="club-data">
                     <Title className="title">
-                        <h1>{arsenalData.shortName}</h1>
-                        <img src={arsenalData.crestUrl} alt="logo" />
+                        <h1>{data.shortName}</h1>
+                        <img src={data.crestUrl} alt="logo" />
                     </Title>
-                    <span>{arsenalData.tla}</span>
-                    <p>Founded: {arsenalData.founded}</p>
-                    <p>{arsenalData.venue}</p>
+                    <span>{data.tla}</span>
+                    <p>Founded: {data.founded}</p>
+                    <p>{data.venue}</p>
                 </div>
             </div>
         </MainHeader>
